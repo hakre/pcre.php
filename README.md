@@ -1,21 +1,19 @@
 # pcre.php
 
-pcre pattern search through files (w/ replace)
+PCRE pattern search and replace through list of files.
 
-cli wrapper around php preg_grep / preg_replace etc. taking a
-list of files from stdin/file.
-
-(copied from source)
+CLI wrapper around php preg_grep / preg_replace etc. taking a
+list of files from stdin/file to search and replace in multiple
+files.
 
 ---
 
 ## Installation
 
-Have a PHP 7-ish (sorry forget the correct requirements) PHP
-binary as PHP on home sys.
+Have a PHP 7.1+ PHP binary as `/usr/bin/env` on the system.
 
-Make `pcre.php` executable (git has you covered) and have it
-within your path.
+Make `pcre.php` executable (git has you covered on checkout) and
+have it within your path.
 
 For example, after cloning and considering `~/bin` is a directory
 within your `$PATH`:
@@ -24,18 +22,27 @@ within your `$PATH`:
 $ cp -a pcre.php ~/bin
 ~~~
 
-The invoking:
+or alternatively create a symbolic link (symlink) for using the
+source version:
+
+~~~
+$ ln -sT "$(realpath ./pcre.php)" ~/bin/pcre.php
+~~~
+
+Then invoking:
 
 ~~~
 $ pcre.php
 ~~~
 
-should just show the cursor blinking. Signal `eof` (e.g. ctrl+d,
-a.k.a. END_OF_TRANSMISSION in Unicode) to get a result:
+should just show the cursor blinking. Signal `eof` (ctrl+d /
+Unicode END_OF_TRANSMISSION) to get a result:
 
 ~~~
 matches in 0 out of 0 files
 ~~~
+
+Congratulations, you managed to search no files for nothing!
 
 This confirms installation works.
 
@@ -43,10 +50,10 @@ This confirms installation works.
 
 Most of these examples require to have the git utility installed.
 
-Print a list of PHP files paths:
+Print a list of PHP file paths:
 
 ~~~
-$ git ls-files *.php | pcre.php
+$ git ls-files '*.php' | pcre.php
 pcre.php
 matches in 0 out of 1 files (0.0%)
 ~~~
@@ -54,7 +61,7 @@ matches in 0 out of 1 files (0.0%)
 Search a list of files:
 
 ~~~
-$ git ls-files *.php | pcre.php '/getopt/'
+$ git ls-files '*.php' | pcre.php '/getopt/'
 pcre.php
 matches in 1 out of 1 files (100.0%)
 ~~~
@@ -62,7 +69,7 @@ matches in 1 out of 1 files (100.0%)
 And actually show each match:
 
 ~~~
-$ git ls-files *.php | pcre.php --show-match '/getopt/'
+$ git ls-files '*.php' | pcre.php --show-match '/getopt/'
   pcre.php
     352:  * Class getopt
     354:  * static helper class for parsing command-line arguments w/ php getopt()
@@ -88,7 +95,7 @@ $ git ls-files *.php | pcre.php --show-match '/getopt/'
 Replace matches:
 
 ~~~
-$ git ls-files *.php | pcre.php '/getopt/' 'replace_getopt'
+$ git ls-files '*.php' | pcre.php -n '/getopt/' 'replace_getopt'
 ...
 ~~~
 
