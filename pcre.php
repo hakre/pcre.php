@@ -593,6 +593,40 @@ function un_quote_path(string $path): string
     return stripcslashes($buffer);
 }
 
+/**
+ * (early) test for range in path (...:<int> greater zero)
+ *
+ * @param string $path
+ * @return bool
+ */
+function is_range_path(string $path): bool
+{
+    list(, $range) = split_range_path($path);
+
+    return $range !== null;
+}
+
+/**
+ * (early) split range containing path into path prefix and range
+ *
+ * NOTE: range right now is only a line number (numbering starts at 1)
+ *
+ * @param string $path
+ * @return array array(string $path, string $range) or array(string $path, null)
+ */
+function split_range_path(string $path): array
+{
+    if (! $result = strrpos($path, ':')) return [$path, null];
+
+    $prefix = substr($path, 0, $result);
+    $suffix = substr($path, $result + 1);
+
+    $line = (int) $suffix;
+    if ($line < 1 || $suffix !== (string) $line) return [$path, null];
+
+    return [$prefix, $suffix];
+}
+
 $opt = [
     'T::nvm', ['files-from::', 'dry-run', 'show-match', 'count-matches', 'print-paths',
     'multiple', 'fnmatch:', 'only:', 'invert', 'file-match:', 'file-match-invert',
@@ -753,14 +787,13 @@ foreach ($paths as $path) {
     }
 
     $range = null;
-    if (!file_exists($path)) {
-        list($test, $range) = explode(':', $path, 2);
+    if (!file_exists($path) && is_range_path($path)) {
+        list($test, $testRange) = split_range_path($path);
         if (file_exists($test)) {
             $path = $test;
-            $range = (int) $range;
-        } else {
-            $range = null;
+            $range = (int) $testRange;
         }
+        unset($test, $testRange);
     }
 
     $lines = @file($path);
