@@ -562,6 +562,37 @@ function pascii_line(string $line): string {
     return pascii($buffer) . $suffix;
 }
 
+/**
+ * (incomplete) test for git core.quotePath quoted path
+ *
+ * @param string $path to test
+ * @return bool test result
+ */
+function is_quote_path(string $path): bool
+{
+    $len = strlen($path);
+    if ($len < 2) return false;
+
+    if ('"' !== $path[0]) return false;
+
+    return '"' === $path[$len - 1];
+}
+
+/**
+ * unquote a git core.quotePath styled path
+ *
+ * @param string $path
+ * @return string
+ */
+function un_quote_path(string $path): string
+{
+    if (!is_quote_path($path)) return $path;
+
+    $buffer = substr($path, 1, -1);
+
+    return stripcslashes($buffer);
+}
+
 $opt = [
     'T::nvm', ['files-from::', 'dry-run', 'show-match', 'count-matches', 'print-paths',
     'multiple', 'fnmatch:', 'only:', 'invert', 'file-match:', 'file-match-invert',
@@ -712,6 +743,13 @@ foreach ($paths as $path) {
     if ($pattern === null) {
         echo $path, "\n";
         continue;
+    }
+
+    // git core.quotePath handling
+    if (!file_exists($path) && is_quote_path($path)) {
+        $test = un_quote_path($path);
+        if (file_exists($test)) $path = $test;
+        unset($test);
     }
 
     $range = null;
