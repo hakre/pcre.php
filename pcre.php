@@ -534,8 +534,8 @@ class getopt
  */
 function pascii(string $buffer): string
 {
-    return preg_replace_callback('/[\x0-\x1F\x7F-\xFF]/', function($match) {
-        return sprintf('\x%X', ord($match[0]));
+    return preg_replace_callback('/[\x0-\x1F\x7F-\xFF]|\\\\(?=x[0-9A-F]{2})/', function($match) {
+        return sprintf('\x%02X', ord($match[0]));
     }, $buffer);
 }
 
