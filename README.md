@@ -6,6 +6,12 @@ CLI wrapper around php preg_grep / preg_replace etc. taking a
 list of files from stdin/file to search and replace in multiple
 files (line based).
 
+[![Latest Stable Version](https://poser.pugx.org/hakre/pcre.php/v/stable)](https://packagist.org/packages/hakre/pcre.php)
+[![Total Downloads](https://poser.pugx.org/hakre/pcre.php/downloads)](https://packagist.org/packages/hakre/pcre.php)
+[![Latest Unstable Version](https://poser.pugx.org/hakre/pcre.php/v/unstable)](https://packagist.org/packages/hakre/pcre.php)
+[![License](https://poser.pugx.org/hakre/pcre.php/license)](https://packagist.org/packages/hakre/pcre.php)
+[![composer.lock](https://poser.pugx.org/hakre/pcre.php/composerlock)](https://packagist.org/packages/hakre/pcre.php)
+
 [Usage](#usage) | [Examples](#examples) | [Installation](#installation)
 
 ---
