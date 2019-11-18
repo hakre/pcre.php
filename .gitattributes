@@ -1,3 +1,6 @@
 .git* export-ignore
+scripts export-ignore
+scripts/** export-ignore
 tests/** export-ignore
+composer.json export-ignore
 *.md filter=space-removal-at-eol
