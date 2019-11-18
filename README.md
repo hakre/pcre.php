@@ -4,47 +4,47 @@ PCRE pattern search and replace through list of files.
 
 CLI wrapper around php preg_grep / preg_replace etc. taking a
 list of files from stdin/file to search and replace in multiple
-files.
+files (line based).
+
+[Usage](#usage) | [Examples](#examples) | [Installation](#installation)
 
 ---
 
-## Installation
-
-Have a PHP 7.1+ PHP binary as `/usr/bin/env` on the system.
-
-Make `pcre.php` executable (git has you covered on checkout) and
-have it within your path.
-
-For example, after cloning and considering `~/bin` is a directory
-within your `$PATH`:
+## Usage
 
 ~~~
-$ cp -a pcre.php ~/bin
+usage: pcre.php [<options>] [<search> [<replace>]]
+                [<options>] --print-paths
+
+Common options
+    -n, --dry-run         do not write changes to files
+    -v                    be verbose
+    --show-match          show path, line number and match(es)/replacement(s)
+    --count-matches       count distinct matches in descending order
+    --print-paths         print paths to stdout, one by line and exit
+    --lines-not | --lines-only <pattern>
+                          filter lines b/f doing search and replace
+    -m, --multiple        search and replace multiple times on the same line
+
+File selection options
+    -T, --files-from=<file>
+                          read paths of files to operate on from <file>. The
+                          special filename "-" or given no filename will read
+                          files from standard input.
+                          each filename is separated by LF ("\n") in a file.
+    --fnmatch <pattern>   filter the list of path(s) by fnmatch() pattern
+    --only <pattern>      only operate on files having a line matching pcre
+                          pattern
+    --invert              invert the meaning of --only pcre pattern match,
+                          operate on files that do not have a line matching
+                          the pcre pattern
+    --file-match <pattern>
+                          only operate on files their contents (not lines)
+                          matches the pcre pattern
+    --file-match-invert   invert the meaning of --file-match
+
 ~~~
-
-or alternatively create a symbolic link (symlink) for using the
-source version:
-
-~~~
-$ ln -sT "$(realpath ./pcre.php)" ~/bin/pcre.php
-~~~
-
-Then invoking:
-
-~~~
-$ pcre.php
-~~~
-
-should just show the cursor blinking. Signal `eof` (ctrl+d /
-Unicode END_OF_TRANSMISSION) to get a result:
-
-~~~
-matches in 0 out of 0 files
-~~~
-
-Congratulations, you managed to search no files for nothing!
-
-This confirms installation works.
+---
 
 ## Examples
 
@@ -115,3 +115,43 @@ $ pcre.php --help
 ~~~
 
 show usage information
+
+---
+
+## Installation
+
+Have a PHP 7.1+ PHP binary as `/usr/bin/env` on the system.
+
+Make `pcre.php` executable (git has you covered on checkout) and
+have it within your path.
+
+For example, after cloning and considering `~/bin` is a directory
+within your `$PATH`:
+
+~~~
+$ cp -a pcre.php ~/bin
+~~~
+
+or alternatively create a symbolic link (symlink) for using the
+source version:
+
+~~~
+$ ln -sT "$(realpath ./pcre.php)" ~/bin/pcre.php
+~~~
+
+Then invoking:
+
+~~~
+$ pcre.php
+~~~
+
+should just show the cursor blinking. Signal `eof` (ctrl+d /
+Unicode END_OF_TRANSMISSION) to get a result:
+
+~~~
+matches in 0 out of 0 files
+~~~
+
+Congratulations, you managed to search no files for nothing!
+
+This confirms installation works.

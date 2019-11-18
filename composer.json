@@ -1,0 +1,19 @@
+{
+  "name": "hakre/pcre.php",
+  "license": "AGPL-3.0-or-later",
+  "homepage": "https://github.com/hakre/pcre.php",
+  "description": "CLI utility for PCRE pattern search and replace through list of files",
+  "keywords": ["cli", "pcre", "files", "utility", "regex"],
+  "require": {
+    "php": "^7.1"
+  },
+  "bin": ["pcre.php"],
+  "scripts": {
+    "build": [
+      "@composer validate --strict",
+      "@php -l pcre.php",
+      "@php -l scripts/build.php",
+      "@php scripts/build.php"
+    ]
+  }
+}
