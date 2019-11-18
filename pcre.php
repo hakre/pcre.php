@@ -86,7 +86,7 @@ class iter implements IteratorAggregate
      * @param bool $terminate terminate yields w/ ending (false by default)
      * @return Generator
      */
-    static function file(string $path, string $ending = "\n", bool $terminate = false): Generator
+    public static function file(string $path, string $ending = "\n", bool $terminate = false): Generator
     {
         /* @link https://bugs.php.net/bug.php?id=53465 */
         $path = preg_replace('(^/(?:proc/self|dev)/(fd/\d+))', 'php://\1', $path);
@@ -144,7 +144,7 @@ class iter implements IteratorAggregate
     /**
      * @return Traversable
      */
-    public function getIterator()
+    public function getIterator(): Traversable
     {
         return $this->iter instanceof Traversable ? $this->iter : new ArrayObject($this->iter);
     }
@@ -291,7 +291,7 @@ function preg_pattern_valid(string $pattern): bool
 {
     error_clear_last();
     if (!$valid = false !== @preg_match($pattern, '')) {
-        fprintf(STDERR, "pcre.php: invlaid pattern: %s\n", error_get_last()['message']);
+        fprintf(STDERR, "pcre.php: invalid pattern: %s\n", error_get_last()['message']);
     }
     return $valid;
 }
@@ -362,12 +362,12 @@ class getopt
      * get selected option arguments from parsed options
      *
      * @param array $opts getopt result
-     * @param string $option name (short or long)
+     * @param string ...$options
      * @return array option argument values, false if an option
      *          was with no argument (switch/flag), string for
      *          a concrete value
      */
-    static function args(array $opts, string ...$options): array
+    public static function args(array $opts, string ...$options): array
     {
         $reservoir = [];
         foreach ($options as $option) {
@@ -398,7 +398,7 @@ class getopt
      *              default flag value or string flag value or string option
      *              argument value
      */
-    static function arg(array $args, $flag = null, $default = null)
+    public static function arg(array $args, $flag = null, $default = null)
     {
         $result = null;
         foreach ($args as $arg) {
@@ -413,7 +413,7 @@ class getopt
     }
 
     /**
-     * index getopt() options and longoptions
+     * index getopt() options and long-options
      *
      * parse (short) options string and longopts array into a map
      * containing the option name as key and the flags as value.
@@ -450,46 +450,46 @@ class getopt
      *
      * @param string $options
      * @param array $longopts
-     * @param int $optind getopt parse stop
-     * @param string $handler
+     * @param int $stop getopt parse stop ($optind)
+     * @param callable $handler
      * @return bool
      * @see getopt::erropt_msg()
      */
-    public static function erropt(string $options, array $longopts, int $optind, $handler = ['getopt', 'erropt_msg']): bool
+    public static function erropt(string $options, array $longopts, int $stop, callable $handler = ['getopt', 'erropt_msg']): bool
     {
-        $idxopt = getopt::idxopt($options, $longopts);
+        $idxopt = self::idxopt($options, $longopts);
 
-        $argvs = $GLOBALS['argv'];
+        $values = $GLOBALS['argv'];
         $skip = 1; // skip utility name (first argument at index 0)
-        foreach ($argvs as $index => $argv) {
+        foreach ($values as $index => $value) {
             if ($skip && $skip--) continue; // skip routine
-            if ($index >= $optind) break;  // stop at stop (halt of getopt() option parsing)
-            if ('--' === $argv) break;  // stop at delimiter
-            if ('-' === $argv) { // skip stdin type of argument (bogus)
+            if ($index >= $stop) break;  // stop at stop (halt of getopt() option parsing)
+            if ('--' === $value) break;  // stop at delimiter
+            if ('-' === $value) { // skip stdin type of argument (bogus)
                 trigger_error('bogus "-"');
                 continue;
             }
-            if ('-' !== ($argv[0] ?? null)) { // stop at first non-option (bogus)
+            if ('-' !== ($value[0] ?? null)) { // stop at first non-option (bogus)
                 trigger_error('bogus ^[^-].*');
                 break;
             }
-            if ('-' === ($argv[1] ?? null)) { // longopt
+            if ('-' === ($value[1] ?? null)) { // long-option
                 $value = null;
-                $name = $buffer = substr($argv, 2);
+                $name = $buffer = substr($value, 2);
                 ($start = strpos($buffer, '=', 1))
                 && ($name = substr($buffer, 0, $start))
                 && $value = substr($buffer, $start + 1);
                 if (!isset($idxopt[$name])) {
-                    $handler(sprintf('unknown option: %s', $argv));
+                    $handler(sprintf('unknown option: %s', $value));
                     return true;
                 }
                 $skip = (int)(':' === $idxopt[$name] && (null === $value));
             } else { // (short) option(s)
-                $buffer = substr($argv, 1);
+                $buffer = substr($value, 1);
                 for ($pos = 0, $len = strlen($buffer); $pos < $len;) {
                     $name = $buffer[$pos];
                     if (!isset($idxopt[$name])) {
-                        $handler(sprintf('unknown option: %s', $argv));
+                        $handler(sprintf('unknown option: %s', $value));
                         return true;
                     }
                     if ('=' === ($buffer[++$pos] ?? null)) {
@@ -504,7 +504,7 @@ class getopt
                     break;
                 }
             }
-            if ($skip && !isset($argvs[$index + 1])) {
+            if ($skip && !isset($values[$index + 1])) {
                 $handler(sprintf('no argument given for -%s%s', 1 === strlen($name) ? '' : '-', $name));
                 return true;
             }
@@ -534,7 +534,7 @@ class getopt
  */
 function pascii(string $buffer): string
 {
-    return preg_replace_callback('/[\x0-\x1F\x7F-\xFF]|\\\\(?=x[0-9A-F]{2})/', function($match) {
+    return preg_replace_callback('/[\x0-\x1F\x7F-\xFF]|\\\\(?=x[0-9A-F]{2})/', static function($match) {
         return sprintf('\x%02X', ord($match[0]));
     }, $buffer);
 }
@@ -636,7 +636,7 @@ $opts = getopt($opt[0], $opt[1], $optind);
 if (getopt::erropt($opt[0], $opt[1], $optind)) {
     show_usage();
     exit(1);
-};
+}
 $opts['verbose'] = getopt::arg(getopt::args($opts, 'v'), true, false);
 
 $input = getopt::arg(getopt::args($opts, 'T', 'files-from'), '-', '-');
@@ -691,8 +691,8 @@ $stats = [
 ];
 
 $paths = iter::fromFile($input);
-$pathsFilter = function (callable $filter) use ($paths, &$stats) {
-    $paths->doFilter(function (string $path) use ($filter, &$stats) {
+$pathsFilter = static function (callable $filter) use ($paths, &$stats) {
+    $paths->doFilter(static function (string $path) use ($filter, &$stats) {
         $result = $filter($path);
         $result || $stats['filtered_paths'][] = $path;
         return $result;
@@ -700,10 +700,10 @@ $pathsFilter = function (callable $filter) use ($paths, &$stats) {
 };
 
 if (isset($opts['fnmatch'])) {
-    $pathsFilter(function (string $path) use ($opts): bool {
+    $pathsFilter(static function (string $path) use ($opts): bool {
         $fnmatch = fnmatch($opts['fnmatch'], $path);
         if (!$fnmatch && $opts['verbose']) {
-            fprintf(STDERR, "filter: --fnamtch %s: %s\n", $opts['fnmatch'], $path);
+            fprintf(STDERR, "filter: --fnmatch %s: %s\n", $opts['fnmatch'], $path);
         }
         return $fnmatch;
     });
@@ -714,7 +714,7 @@ if (isset($opts['only'])) {
         fprintf(STDERR, 'fatal: invalid only pattern: `%s`' . "\n", $opts['only']);
         exit(1);
     }
-    $pathsFilter(function (string $path) use ($opts, &$stats): bool {
+    $pathsFilter(static function (string $path) use ($opts, &$stats): bool {
         $lines = file($path);
         if ($lines === false) {
             fprintf(STDERR, "i/o error: can not read file '%s'\n", $path);
@@ -737,7 +737,7 @@ if (isset($opts['file-match'])) {
         fprintf(STDERR, 'fatal: invalid file-match pattern: `%s`' . "\n", $opts['file-match']);
         exit(1);
     }
-    $pathsFilter(function (string $path) use ($opts, &$stats): bool {
+    $pathsFilter(static function (string $path) use ($opts, &$stats): bool {
         $buffer = file_get_contents($path);
         if ($buffer === false) {
             fprintf(STDERR, "i/o error: can not read file '%s'\n", $path);
@@ -757,7 +757,7 @@ if (isset($opts['file-match'])) {
 
 if (false === ($opts['print-paths'] ?? true)) {
     $pathCounter = 0;
-    $paths->each(function(string $path) use (&$pathCounter) {
+    $paths->each(static function(string $path) use (&$pathCounter) {
         echo $path, "\n";
         $pathCounter++;
     });
@@ -825,7 +825,7 @@ foreach ($paths as $path) {
 
     $matchLines = $lines;
     if (null !== $range) {
-        $matchLines = array_filter($matchLines, function (int $offset) use ($range) {
+        $matchLines = array_filter($matchLines, static function (int $offset) use ($range) {
             return $offset + 1 === $range;
         }, ARRAY_FILTER_USE_KEY);
     }
