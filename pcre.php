@@ -773,11 +773,6 @@ if (false === ($opts['print-paths'] ?? true)) {
 
 foreach ($paths as $path) {
     $stats['count_paths']++;
-    // empty pattern, just output the file; output by default
-    if ($pattern === null) {
-        echo $path, "\n";
-        continue;
-    }
 
     // git core.quotePath handling
     if (!file_exists($path) && is_quote_path($path)) {
@@ -794,6 +789,12 @@ foreach ($paths as $path) {
             $range = (int) $testRange;
         }
         unset($test, $testRange);
+    }
+
+    // empty pattern, just output the file; output by default
+    if ($pattern === null) {
+        echo pascii($path), "\n";
+        continue;
     }
 
     $lines = @file($path);
