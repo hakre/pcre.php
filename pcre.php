@@ -455,8 +455,10 @@ class getopt
      * @return bool
      * @see getopt::erropt_msg()
      */
-    public static function erropt(string $options, array $longopts, int $stop, callable $handler = ['getopt', 'erropt_msg']): bool
+    public static function erropt(string $options, array $longopts, int $stop, callable $handler = null): bool
     {
+        (null === $handler) && $handler = ['getopt', 'erropt_msg'];
+
         $idxopt = self::idxopt($options, $longopts);
 
         $values = $GLOBALS['argv'];
@@ -474,16 +476,16 @@ class getopt
                 break;
             }
             if ('-' === ($value[1] ?? null)) { // long-option
-                $value = null;
+                $argValue = null;
                 $name = $buffer = substr($value, 2);
                 ($start = strpos($buffer, '=', 1))
                 && ($name = substr($buffer, 0, $start))
-                && $value = substr($buffer, $start + 1);
+                && $argValue = substr($buffer, $start + 1);
                 if (!isset($idxopt[$name])) {
-                    $handler(sprintf('unknown option: %s', $value));
+                    call_user_func($handler, sprintf('unknown option: %s', $value));
                     return true;
                 }
-                $skip = (int)(':' === $idxopt[$name] && (null === $value));
+                $skip = (int)(':' === $idxopt[$name] && (null === $argValue));
             } else { // (short) option(s)
                 $buffer = substr($value, 1);
                 for ($pos = 0, $len = strlen($buffer); $pos < $len;) {

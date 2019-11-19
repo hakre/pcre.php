@@ -12,7 +12,7 @@ files (line based).
 [![License](https://poser.pugx.org/hakre/pcre.php/license)](https://packagist.org/packages/hakre/pcre.php)
 [![composer.lock](https://poser.pugx.org/hakre/pcre.php/composerlock)](https://packagist.org/packages/hakre/pcre.php)
 
-[Usage](#usage) | [Examples](#examples) | [Installation](#installation)
+[Usage](#usage) | [Examples](#examples) | [Installation](#installation) | [Development](#development)
 
 ---
 
@@ -161,3 +161,32 @@ matches in 0 out of 0 files
 Congratulations, you managed to search no files for nothing!
 
 This confirms installation works.
+
+
+## Development
+
+This project is merely scratching an itch for me however as I
+need to develop it myself, there is a certain baseline:
+
+* *Git required*. Yet no specific version requirements known
+    * It works from source, so `git clone` is a valid way to obtain
+      the utility.
+* *Composer required*. It comes with a build and also with tests:
+    * `$ composer build` - invokes the build (script)
+    * `$ composer test` - runs just the tests (no full build)
+      the tests are smoke tests right now (they were not
+      yesterday).
+
+Right now `pcre.php` is a single PHP file. So patching,
+maintaining and even developing requires some working into. The
+benefit is that most things are directly accessible. The
+downside is that things might change abruptly.
+
+The build script so far takes the usage instructions out of the
+`pcre.php` file into `README.md` so that it is kept up to date.
+
+Feature requests are best done with a pull-request to demonstrate
+the feature as thought of. It's fine if it destroys some other
+functionality as long as this is properly highlighted in a pull-
+request, so yes, this is a project where you can file pseudo code
+pull requests even.

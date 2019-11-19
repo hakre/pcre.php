@@ -10,10 +10,17 @@
   "bin": ["pcre.php"],
   "scripts": {
     "build": [
+      "@test",
+      "@php scripts/build.php"
+    ],
+    "lint": [
       "@composer validate --strict",
       "@php -l pcre.php",
-      "@php -l scripts/build.php",
-      "@php scripts/build.php"
+      "@php -l scripts/build.php"
+    ],
+    "test": [
+      "@lint",
+      "tests/smoke.sh"
     ]
   }
 }
