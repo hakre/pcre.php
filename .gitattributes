@@ -1,7 +1,6 @@
 .git* export-ignore
 scripts export-ignore
-scripts/** export-ignore
-tests/** export-ignore
 tests export-ignore
 composer.json export-ignore
+*.json filter=space-removal-at-eol
 *.md filter=space-removal-at-eol

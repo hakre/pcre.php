@@ -18,6 +18,11 @@
       "@php -l pcre.php",
       "@php -l scripts/build.php"
     ],
+    "package": [
+      "@build",
+      "git diff --cached --quiet # no uncommitted changes",
+      "git archive -o hakre-pcre.php-$(git describe --tags --always --first-parent).tar.gz HEAD"
+    ],
     "test": [
       "@lint",
       "tests/smoke.sh"

@@ -162,7 +162,6 @@ Congratulations, you managed to search no files for nothing!
 
 This confirms installation works.
 
-
 ## Development
 
 This project is merely scratching an itch for me however as I
@@ -190,3 +189,35 @@ the feature as thought of. It's fine if it destroys some other
 functionality as long as this is properly highlighted in a pull-
 request, so yes, this is a project where you can file pseudo code
 pull requests even.
+
+### Package
+
+A package (at a revision) can be produced with the `git archive`
+command:
+
+~~~
+$ git archive -o hakre-pcre.php.tar.gz HEAD
+~~~
+
+The package will be generated in the project root (which is
+ignored by the project's `.gitignore` under such a name).
+Existing files are being overwritten but files should be
+reproducible per the revision.
+
+The full packaging with a version identifier in the output file-
+name can be done (running test, build etc. first) with:
+
+~~~
+$ composer package
+~~~
+
+To test manually and check the list of files in the package:
+
+~~~
+$ git archive HEAD . | tar -t
+README.md
+pcre.php
+~~~
+
+I think it's fine to have the read-me and the actual utility
+packaged but skip the rest. This is also tested for.
