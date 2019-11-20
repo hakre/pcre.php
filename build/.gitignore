@@ -1,0 +1,5 @@
+# build directory
+#   packages: reproducible packages (hakre-pcre.php*.tar.gz)
+
+/*
+!/.gitignore
