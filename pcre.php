@@ -159,14 +159,16 @@ class iter implements IteratorAggregate
      */
     public static function first(iterable $it, callable $cb)
     {
-        foreach ($it as $key => $value) {
+        $iit = new self($it);
+        $nri = new NoRewindIterator(new IteratorIterator($iit));
+        foreach ($nri as $key => $value) {
             $result = $cb($value);
             if (!$result) {
                 continue;
             }
             yield $key => $value;
-            yield from $it;
-            break;
+            $nri->next();
+            yield from $nri;
         }
     }
 
