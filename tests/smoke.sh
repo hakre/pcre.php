@@ -1,4 +1,5 @@
 #!/bin/bash
+# this file is part of pcre.php
 set -uo pipefail
 IFS=$'\n\t'
 
