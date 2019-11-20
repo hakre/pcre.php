@@ -20,7 +20,7 @@
     ],
     "package": [
       "@build",
-      "git diff --cached --quiet # no uncommitted changes",
+      "git diff --cached --quiet # no uncommitted but staged changes",
       "git archive -o hakre-pcre.php-$(git describe --tags --always --first-parent).tar.gz HEAD",
       "shasum -a512 hakre-pcre.php*.tar.gz"
     ],
