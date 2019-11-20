@@ -146,7 +146,7 @@ class iter implements IteratorAggregate
      */
     public function getIterator(): Traversable
     {
-        return $this->iter instanceof Traversable ? $this->iter : new ArrayObject($this->iter);
+        yield from $this->iter;
     }
 
     /**
