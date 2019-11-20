@@ -631,6 +631,11 @@ function split_range_path(string $path): array
     return [$prefix, $suffix];
 }
 
+/* include mode */
+if (count(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1))) {
+    return;
+}
+
 $opt = [
     'T::nvm', ['files-from::', 'dry-run', 'show-match', 'count-matches', 'print-paths',
     'multiple', 'fnmatch:', 'only:', 'invert', 'file-match:', 'file-match-invert',

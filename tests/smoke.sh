@@ -20,6 +20,10 @@ echo "# files with no newline at the end of file are skipped"
 git ls-files '*/*newline*.php' | pcre.php '/FOO/'
 [[ $? -eq 0 ]]
 
+echo "# works with including (unit tests)"
+tests/include.php
+[[ $? -eq 0 ]]
+
 echo "# packaging with git archive (worktree attributes)"
 <<EOD diff <( git archive --worktree-attributes HEAD | tar -t ) -
 README.md

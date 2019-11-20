@@ -27,7 +27,11 @@
     ],
     "test": [
       "@lint",
-      "tests/smoke.sh"
+      "tests/smoke.sh",
+      "vendor/bin/phpunit --color=always"
     ]
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^8.4"
   }
 }

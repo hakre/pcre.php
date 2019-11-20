@@ -1,6 +1,7 @@
 .git* export-ignore
 build export-ignore
-composer.json export-ignore
+composer.* export-ignore
+phpunit.xml.dist export-ignore
 scripts export-ignore
 tests export-ignore
 

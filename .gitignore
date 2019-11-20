@@ -1,2 +1,8 @@
 # package output ($ composer package)
 /build/packages/hakre-pcre.php*.tar.gz
+
+# composer
+/vendor/
+
+# phpunit
+/.phpunit.result.cache
