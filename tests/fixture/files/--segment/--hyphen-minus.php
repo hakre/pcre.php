@@ -6,6 +6,6 @@
 
 ?>
 
-This file has a double-quote in its filename.
+This file begins with a hyphen-minus in its filename.
 
 FOO

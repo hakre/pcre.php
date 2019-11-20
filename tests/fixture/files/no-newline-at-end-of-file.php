@@ -4,8 +4,4 @@
  * this file is part of pcre.php
  */
 
-?>
-
-This file has a double-quote in its filename.
-
-FOO
+# misses a newline at end of file (EOF) by intention

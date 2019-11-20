@@ -15,6 +15,9 @@ echo "# works with git-ls-files in quote mode"
 git ls-files '*.php' | ./pcre.php 2>&1
 [[ $? -eq 0 ]]
 
+echo "# files with no newline at the end of file are skipped"
+git ls-files '*/*newline*.php' | pcre.php '/FOO/'
+[[ $? -eq 0 ]]
 
 echo "# packaging with git archive"
 <<EOD diff <( git archive HEAD | tar -t ) -
