@@ -762,7 +762,7 @@ if (isset($opts['file-match'])) {
 if (false === ($opts['print-paths'] ?? true)) {
     $pathCounter = 0;
     $paths->each(static function(string $path) use (&$pathCounter) {
-        echo $path, "\n";
+        echo pascii($path), "\n";
         $pathCounter++;
     });
     $opts['verbose'] && fprintf(
@@ -855,7 +855,7 @@ foreach ($paths as $path) {
     }
 
     if (null === $replacement) {
-        if (!$countMatches) echo $path, "\n";
+        if (!$countMatches) echo pascii($path), "\n";
         if ($showMatch) foreach ($matchedLines as $index => $line) {
             printf(' % 4d: %s', $index + 1, pascii_line($line));
         }
