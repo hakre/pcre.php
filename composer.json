@@ -2,8 +2,8 @@
   "name": "hakre/pcre.php",
   "license": "AGPL-3.0-or-later",
   "homepage": "https://github.com/hakre/pcre.php",
-  "description": "CLI utility for PCRE pattern search and replace through list of files",
-  "keywords": ["cli", "pcre", "files", "utility", "regex"],
+  "description": "CLI utility for PCRE pattern search and replace through list of files (line based)",
+  "keywords": ["cli", "git", "files", "pcre", "regex", "replace", "search", "shell", "utility"],
   "require": {
     "php": "^7.1"
   },
