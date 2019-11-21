@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
  * Basic Test-Suite for not yet grouped things. It basically demonstrates
  * that it works w/ the bootstrapping.
  */
-class PcrePhpTest extends PHPUnit\Framework\TestCase
+class PcrePhpTest extends TestCase
 {
     public function testPascii()
     {
