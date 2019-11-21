@@ -707,6 +707,20 @@ $pathsFilter = static function (callable $filter) use ($paths, &$stats) {
         return $result;
     });
 };
+$pathsMapping = static function (callable $mapping) use ($paths) {
+    $paths->doMap(static function (string $path) use ($mapping) {
+        return $mapping($path);
+    });
+};
+
+// git core.quotePath handling
+$pathsMapping(static function(string $path) {
+    if (!file_exists($path) && is_quote_path($path)) {
+        $test = un_quote_path($path);
+        if (file_exists($test)) return $test;
+    }
+    return $path;
+});
 
 if (isset($opts['fnmatch'])) {
     $pathsFilter(static function (string $path) use ($opts): bool {
@@ -782,13 +796,6 @@ if (false === ($opts['print-paths'] ?? true)) {
 
 foreach ($paths as $path) {
     $stats['count_paths']++;
-
-    // git core.quotePath handling
-    if (!file_exists($path) && is_quote_path($path)) {
-        $test = un_quote_path($path);
-        if (file_exists($test)) $path = $test;
-        unset($test);
-    }
 
     $range = null;
     if (!file_exists($path) && is_range_path($path)) {
