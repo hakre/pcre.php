@@ -567,6 +567,21 @@ function pascii_line(string $line): string {
 }
 
 /**
+ * some paths are just not valid. for example those that
+ * contain a NUL-byte.
+ *
+ * the rest depends on configuration, see PATHCHK(1), which
+ * is excluded here.
+ *
+ * @param string $path
+ * @return bool
+ */
+function is_valid_path(string $path): bool
+{
+    return false === strpos($path, "\0");
+}
+
+/**
  * (incomplete) test for git core.quotePath quoted path
  *
  * @param string $path to test
@@ -574,6 +589,8 @@ function pascii_line(string $line): string {
  */
 function is_quote_path(string $path): bool
 {
+    if (!is_valid_path($path)) return false;
+
     $len = strlen($path);
     if ($len < 2) return false;
 
@@ -595,6 +612,31 @@ function un_quote_path(string $path): string
     $buffer = substr($path, 1, -1);
 
     return stripcslashes($buffer);
+}
+
+/**
+ * git core.quotePath handling (fuzzy guess work)
+ */
+function fuzzy_quote_path_normalizer(string $path) {
+    if (is_valid_path($path) && !file_exists($path) && is_quote_path($path)) {
+        $test = un_quote_path($path);
+        if (file_exists($test)) return $test;
+    }
+    return $path;
+}
+
+/**
+ * wrapper for @see file()
+ *
+ * @param string $path
+ * @return array|bool|false
+ */
+function pcrephp_file(string $path) {
+    if (!is_valid_path($path)) {
+        trigger_error('invalid path');
+        return false;
+    }
+    return file($path);
 }
 
 /**
@@ -714,13 +756,7 @@ $pathsMapping = static function (callable $mapping) use ($paths) {
 };
 
 // git core.quotePath handling
-$pathsMapping(static function(string $path) {
-    if (!file_exists($path) && is_quote_path($path)) {
-        $test = un_quote_path($path);
-        if (file_exists($test)) return $test;
-    }
-    return $path;
-});
+$pathsMapping('fuzzy_quote_path_normalizer');
 
 if (isset($opts['fnmatch'])) {
     $pathsFilter(static function (string $path) use ($opts): bool {
@@ -738,7 +774,7 @@ if (isset($opts['only'])) {
         exit(1);
     }
     $pathsFilter(static function (string $path) use ($opts, &$stats): bool {
-        $lines = file($path);
+        $lines = @pcrephp_file($path);
         if ($lines === false) {
             fprintf(STDERR, "i/o error: can not read file '%s'\n", $path);
             return false;
@@ -798,7 +834,7 @@ foreach ($paths as $path) {
     $stats['count_paths']++;
 
     $range = null;
-    if (!file_exists($path) && is_range_path($path)) {
+    if (is_valid_path($path) && !file_exists($path) && is_range_path($path)) {
         list($test, $testRange) = split_range_path($path);
         if (file_exists($test)) {
             $path = $test;
@@ -813,7 +849,7 @@ foreach ($paths as $path) {
         continue;
     }
 
-    $lines = @file($path);
+    $lines = @pcrephp_file($path);
     if (false === $lines) {
         $opts['verbose'] && fprintf(STDERR, "error: %s\n", error_get_last()['message']);
         $stats['openerror_paths'][] = $path;

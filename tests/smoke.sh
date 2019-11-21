@@ -17,6 +17,10 @@ echo "# works with git-ls-files in quote mode"
 git ls-files '*.php' | ./pcre.php 2>&1
 [[ $? -eq 0 ]] || exit 1
 
+echo "# injecting null bytes in paths does not fatal error"
+git ls-files -z 'pcre.php' | ./pcre.php
+[[ $? -eq 0 ]] || exit 1
+
 echo "# files with no newline at the end of file are skipped"
 git ls-files '*/*newline*.php' | pcre.php '/FOO/'
 [[ $? -eq 0 ]] || exit 1
