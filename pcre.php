@@ -57,6 +57,19 @@ function show_usage()
 }
 
 /**
+ * mangle a system path into one php understands
+ */
+function php_fs_path(string $path): string
+{
+    /* @link https://bugs.php.net/bug.php?id=53465 */
+    $result = preg_replace('(^/(?:proc/self|dev)/(fd/\d+))', 'php://\1', $path);
+    if (null === $result) {
+        throw new UnexpectedValueException('internal: failed to handle path by pattern/preg_replace');
+    }
+    return $result;
+}
+
+/**
  * Class iter
  *
  * @method iter fromFile(string $path, string $ending = "\n", bool $terminate = false)
@@ -88,8 +101,7 @@ class iter implements IteratorAggregate
      */
     public static function file(string $path, string $ending = "\n", bool $terminate = false): Generator
     {
-        /* @link https://bugs.php.net/bug.php?id=53465 */
-        $path = preg_replace('(^/(?:proc/self|dev)/(fd/\d+))', 'php://\1', $path);
+        $path = php_fs_path($path);
 
         $fp = fopen($path, 'rb');
         if (false === $fp) return;
@@ -626,6 +638,83 @@ function fuzzy_quote_path_normalizer(string $path) {
 }
 
 /**
+ * read from string until ending from offset
+ *
+ * returns the string read. forward offset after ending, if ending is at
+ * the end of string or no ending is found from offset, offset is unchanged
+ * and returned string is null.
+ *
+ * @param string $string
+ * @param int $offset
+ * @param string $ending
+ * @return string
+ */
+function string_get_line(string $string, int &$offset, string $ending = "\n"): ?string
+{
+    $pos = strpos($string, $ending, $offset);
+    if (false === $pos) {
+        return null;
+    }
+    $buffer = substr($string, $offset, $pos - $offset);
+
+    $offset = $pos + strlen($ending);
+    return $buffer;
+}
+
+/**
+ * read paths from a file in auto-detect mode
+ *
+ * path represents a file containing a list of paths. that list is either
+ * newline separated (common, special characters in each path then might be
+ * quoted which is handled elsewhere, compare git core.quotePath) or NUL
+ * byte separated.
+ *
+ * strategy here is to first look for NUL bytes because if they exist, this
+ * is a considered a clear bet. if not, fall-back to newline as separator
+ *
+ * @see Iter::file()
+ * @param string $path
+ * @return Generator
+ */
+function fuzzy_paths_from_file(string $path): Generator
+{
+    $path = php_fs_path($path);
+
+    $fp = fopen($path, 'rb');
+    if (false === $fp) return;
+
+    if (feof($fp)) {
+        fclose($fp);
+        return;
+    }
+
+    $buffer = fread($fp, 4096);
+    $ending = "\0";
+    $pos = strpos($buffer, $ending);
+    if (false === $pos) { // fall back to newline
+        $ending = "\n";
+    }
+    $offset = 0;
+    while (null !== $line = string_get_line($buffer, $offset, $ending)) {
+        yield $line;
+    }
+    $buffer = substr($buffer, $offset);
+    if (feof($fp)) {
+        yield $buffer;
+    }
+
+    while (!feof($fp) && $line = stream_get_line($fp, 4096, $ending)) {
+        if (isset($buffer)) {
+            yield $buffer . $line;
+            unset($buffer);
+            continue;
+        }
+        yield $line;
+    }
+    fclose($fp);
+}
+
+/**
  * wrapper for @see file()
  *
  * @param string $path
@@ -741,7 +830,7 @@ $stats = [
     'count_matches' => [],
 ];
 
-$paths = iter::fromFile($input);
+$paths = new Iter(fuzzy_paths_from_file($input));
 $pathsFilter = static function (callable $filter) use ($paths, &$stats) {
     $paths->doFilter(static function (string $path) use ($filter, &$stats) {
         $result = $filter($path);
