@@ -7,6 +7,7 @@ echo "diff..: $(diff --version | head -n 1)"
 echo "git...: $(git --version | sed -e 's/git version //')"
 echo "php.... $(php --version | head -n 1)"
 echo "shasum: $(shasum --version)"
+echo "sort..: $(sort --version | head -n 1)"
 
 echo "# wrong argument gives error"
 ./pcre.php --faux-long-option 1>/dev/null

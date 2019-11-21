@@ -23,7 +23,7 @@
       "git diff --cached --quiet # no uncommitted but staged changes",
       "mkdir -p build/packages/",
       "git archive -o build/packages/hakre-pcre.php-$(git describe --tags --always --first-parent).tar.gz HEAD",
-      "shasum -a512 build/packages/hakre-pcre.php*.tar.gz"
+      "shasum -a512 build/packages/hakre-pcre.php*.tar.gz | sort -k 1,2Vr"
     ],
     "test": [
       "@lint",
