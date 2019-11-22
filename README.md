@@ -3,8 +3,8 @@
 PCRE pattern search and replace through list of files.
 
 CLI wrapper around php preg_grep / preg_replace etc. taking a
-list of files from stdin/file to search and replace in multiple
-files (line based).
+list of files from stdin/file to search and replace in (line
+based).
 
 [![Latest Stable Version](https://poser.pugx.org/hakre/pcre.php/v/stable)](https://packagist.org/packages/hakre/pcre.php)
 [![Total Downloads](https://poser.pugx.org/hakre/pcre.php/downloads)](https://packagist.org/packages/hakre/pcre.php)
@@ -168,18 +168,28 @@ This project is merely scratching an itch for me however as I
 need to develop it myself, there is a certain baseline:
 
 * *Git required*. Yet no specific version requirements known
-    * It works from source, so `git clone` is a valid way to obtain
-      the utility.
+    * It works from source, so `git clone` is a valid way to
+      obtain the utility.
 * *Composer required*. It comes with a build and also with tests:
     * `$ composer build` - invokes the build (script)
     * `$ composer test` - runs just the tests (no full build)
-      the tests are smoke tests right now (they were not
-      yesterday).
+      the tests are smoke tests and the Phpunit test suite right
+      now (these were not available a couple of days ago).
+    * `$ composer package` - can you package it. runs the whole
+      build and then packages under the current revision.
 
 Right now `pcre.php` is a single PHP file. So patching,
 maintaining and even developing requires some working into. The
 benefit is that most things are directly accessible. The
 downside is that things might change abruptly.
+
+Regressions can be easily tested for by adding a test-case to
+`smoke.sh` and perhaps extending the fixture (in `tests/fixture`)
+.
+
+Any units (functions, classes) can be unit-tested with Phpunit in
+a recent version, it is pre-configured in the repository and can
+be installed with composer as a development requirement.
 
 The build script so far takes the usage instructions out of the
 `pcre.php` file into `README.md` so that it is kept up to date.
@@ -199,8 +209,9 @@ command:
 $ git archive -o hakre-pcre.php.tar.gz HEAD
 ~~~
 
-The package will be generated in the project root (which is
-ignored by the project's `.gitignore` under such a name).
+The package will be generated in the project root then which
+git will highlight as new files.
+
 Existing files are being overwritten but files should be
 reproducible per the revision.
 
