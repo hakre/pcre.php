@@ -49,6 +49,10 @@ File selection options
                           matches the pcre pattern
     --file-match-invert   invert the meaning of --file-match
 
+Operational options
+    -C <path>             run as if pcre.php was started in <path> instead
+                          of the current working directory.
+
 ~~~
 ---
 

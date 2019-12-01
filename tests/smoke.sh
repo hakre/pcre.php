@@ -9,6 +9,10 @@ echo "php.... $(php --version | head -n 1)"
 echo "shasum: $(shasum --version)"
 echo "sort..: $(sort --version | head -n 1)"
 
+echo "# -C works and fails"
+./pcre.php -C . -C build -C ..  -C tests -C neverland
+[[ $? -eq 1 ]] || exit 1
+
 echo "# wrong argument gives error"
 ./pcre.php --faux-long-option 1>/dev/null
 [[ $? -eq 1 ]] || exit 1

@@ -38,6 +38,10 @@
  *                           only operate on files their contents (not lines)
  *                           matches the pcre pattern
  *     --file-match-invert   invert the meaning of --file-match
+ *
+ * Operational options
+ *     -C <path>             run as if pcre.php was started in <path> instead
+ *                           of the current working directory.
  */
 
 /**
@@ -427,6 +431,37 @@ class getopt
     }
 
     /**
+     * combine all arguments into a list
+     *
+     * @param array $args all option arguments, key is option name, values
+     *        are false for option w/o argument (switch, ignored), string for
+     *        option argument
+     * @param Closure $filter (optional) filter closure that maps each entry,
+     *        non-string returns will remove the element from the result
+     * @return array
+     */
+    public static function arglst(array $args, $filter = null)
+    {
+        $result = [];
+        foreach ($args as $arg) {
+            if (!is_string($arg)) { // really, only string arguments
+                continue;
+            }
+
+            if ($filter instanceof Closure) {
+                $arg = $filter($arg);
+                if (!is_string($arg)) {
+                    continue;
+                }
+            }
+
+            $result[] = $arg;
+        }
+
+        return $result;
+    }
+
+    /**
      * index getopt() options and long-options
      *
      * parse (short) options string and longopts array into a map
@@ -768,9 +803,9 @@ if (count(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1))) {
 }
 
 $opt = [
-    'T::nvm', ['files-from::', 'dry-run', 'show-match', 'count-matches', 'print-paths',
-    'multiple', 'fnmatch:', 'only:', 'invert', 'file-match:', 'file-match-invert',
-    'lines-only:', 'lines-not:']
+    'C:T::nvm', ['files-from::', 'dry-run', 'show-match', 'count-matches', 'print-paths',
+        'multiple', 'fnmatch:', 'only:', 'invert', 'file-match:', 'file-match-invert',
+        'lines-only:', 'lines-not:']
 ];
 $opts = getopt($opt[0], $opt[1], $optind);
 if (getopt::erropt($opt[0], $opt[1], $optind)) {
@@ -778,6 +813,15 @@ if (getopt::erropt($opt[0], $opt[1], $optind)) {
     exit(1);
 }
 $opts['verbose'] = getopt::arg(getopt::args($opts, 'v'), true, false);
+getopt::arglst(getopt::args($opts, 'C'), static function ($arg) use ($opts) {
+    $result = @chdir($arg);
+    if (!$result) {
+        vfprintf(STDERR, "fatal: can not change to '%s': %s\n", [
+            $arg, preg_replace('(^chdir\(\): | \(errno \d+\)$)', '', error_get_last()['message'])
+        ]);
+        exit(1);
+    }
+});
 
 $input = getopt::arg(getopt::args($opts, 'T', 'files-from'), '-', '-');
 if ($input !== '-' && !is_readable($input)) {
