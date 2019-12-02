@@ -836,7 +836,7 @@ if ('-' === $input) {
 $dryRun = false === ($opts['n'] ?? $opts['dry-run'] ?? true);
 $showMatch = false === ($opts['show-match'] ?? true);
 $countMatches = false === ($opts['count-matches'] ?? true);
-$multiple = getopt::arg(getopt::args($opts, 'm', 'multiple'));
+$multiple = getopt::arg(getopt::args($opts, 'm', 'multiple'), true, false);
 $linesOnly = $opts['lines-only'] ?? null;
 $linesNot = $opts['lines-not'] ?? null;
 
@@ -1025,13 +1025,19 @@ foreach ($paths as $path) {
     $count = count($matchedLines);
 
     if ($countMatches) foreach ($matchedLines as $index => $line) {
-        $result = preg_match($pattern, $line, $matches);
-        if ($result && strlen($matches[0])) {
-            $reservoir = &$stats['count_matches']['matches'][$matches[0]];
+        if ($multiple) {
+            $result = preg_match_all($pattern, $line, $matches);
+        } else {
+            $result = preg_match($pattern, $line, $matches);
+            $matches = [$matches];
+        }
+        if ($result && count($matches[0])) foreach ($matches[0] as $match) {
+            $reservoir = &$stats['count_matches']['matches']["_$match"];
             $reservoir[] = [$path, $index + 1];
-            $reservoir = &$stats['count_matches']['paths'][$matches[0]][$path];
-            $reservoir++;
             unset($reservoir);
+            $pathCounter = &$stats['count_matches']['paths']["_$match"]["_$path"];
+            $pathCounter++;
+            unset($pathCounter);
         }
     }
 
@@ -1083,12 +1089,14 @@ if ($countMatches) {
         $stats['count_matches_count']['matches'] = array_map('count', $stats['count_matches']['matches']);
         arsort($stats['count_matches_count']['matches'], SORT_NUMERIC);
         $stats['count_matches_count']['total'] = array_sum($stats['count_matches_count']['matches']);
-        foreach ($stats['count_matches_count']['matches'] as $match => $count) {
+        $listCount = 0;
+        foreach ($stats['count_matches_count']['matches'] as $matchKey => $count) {
+            $match = substr($matchKey, 1);
             $matchD = $match;
             ($matchD === $matchA = pascii($match)) || $matchD .= "' '$matchA";
-            fprintf(STDOUT, "'%s': %d (%.1F%% / files: %.1F%%)\n", $matchD, $count,
+            fprintf(STDOUT, "%d. '%s': %d (%.1F%% / files: %.1F%%)\n", ++$listCount, $matchD, $count,
                 100 * $count / $stats['count_matches_count']['total'],
-                100 * count($stats['count_matches']['paths'][$match]) / $stats['count_paths']
+                100 * count($stats['count_matches']['paths'][$matchKey]) / $stats['count_paths']
             );
         }
     }
