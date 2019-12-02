@@ -26,8 +26,8 @@
  *     -T, --files-from=<file>
  *                           read paths of files to operate on from <file>. The
  *                           special filename "-" or given no filename will read
- *                           files from standard input.
- *                           each filename is separated by LF ("\n") in a file.
+ *                           files from standard input
+ *                           each filename is separated by LF ("\n") in a file
  *     --fnmatch <pattern>   filter the list of path(s) by fnmatch() pattern
  *     --only <pattern>      only operate on files having a line matching pcre
  *                           pattern
@@ -41,7 +41,7 @@
  *
  * Operational options
  *     -C <path>             run as if pcre.php was started in <path> instead
- *                           of the current working directory.
+ *                           of the current working directory
  */
 
 /**
@@ -62,6 +62,8 @@ function show_usage()
 
 /**
  * mangle a system path into one php understands
+ * @param string $path
+ * @return string
  */
 function php_fs_path(string $path): string
 {
@@ -173,7 +175,7 @@ class iter implements IteratorAggregate
      * @param callable $cb
      * @return Generator
      */
-    public static function first(iterable $it, callable $cb)
+    public static function first(iterable $it, callable $cb): ?\Generator
     {
         $iit = new self($it);
         $nri = new NoRewindIterator(new IteratorIterator($iit));
