@@ -52,6 +52,7 @@ File selection options
 Operational options
     -C <path>             run as if pcre.php was started in <path> instead
                           of the current working directory
+    --version             display version information and exit
 
 ~~~
 ---

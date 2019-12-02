@@ -3,7 +3,7 @@
 /*
  * pcre pattern search through files (w/ replace)
  *
- * $Ver$ $Id$
+ * $Ver: v0.0.7 $ $Id$
  *
  * cli wrapper around php preg_grep / preg_replace etc. taking a list
  * of files from stdin/file.
@@ -44,6 +44,7 @@
  * Operational options
  *     -C <path>             run as if pcre.php was started in <path> instead
  *                           of the current working directory
+ *     --version             display version information and exit
  */
 
 /**
@@ -60,6 +61,90 @@ function show_usage()
         if (preg_match('(^ \*/$)', $line)) break;
     }
     echo "\n";
+}
+
+function source_marker_read(string $buffer, string $name): array
+{
+    $pattern = sprintf('(\$%s(?:: ([^ $]*) )?\$)', preg_quote($name, '()'));
+    $result = preg_match($pattern, $buffer, $matches);
+    assert(false !== $result);
+    if (!$result) {
+        return [];
+    }
+
+    return [$matches[0], $matches[1] ?? null];
+}
+
+function source_marker_write(string $buffer, string $name, string $value = null): string
+{
+    $result = source_marker_read($buffer, $name);
+    if ($result === [] || $value === $result[1]) {
+        return $buffer;
+    }
+
+    return substr_replace(
+        $buffer,
+        sprintf('$%s%s$', $name, null === $value ? '' : ": $value "),
+        strpos($buffer, $result[0]),
+        strlen($result[0])
+    );
+}
+
+function source_markers_read(array $markers, array $lines, int $cap = null)
+{
+    assert(0 < count($lines));
+
+    $cap = $cap ?? count($lines);
+    assert(0 <= $cap);
+
+    foreach ($lines as $index => $line) {
+        if ($index <= $cap) foreach ($markers as $name => $value) {
+            $value || $markers[$name] = source_marker_read($line, $name);
+        }
+    }
+
+    return $markers;
+}
+
+function source_git_version(): string
+{
+    return exec('git describe --long --tags --dirty --always --match \'v[0-9]\.[0-9]*\' 2>/dev/null');
+}
+
+function source_version(array $lines, int $cap = null): string
+{
+    assert(0 < count($lines));
+
+    $cap = $cap ?? count($lines);
+    assert(0 <= $cap);
+
+    $markers = ['Ver' => null, 'Id' => null];
+    $markers = source_markers_read($markers, $lines, $cap);
+    assert($markers['Ver'] !== null);
+    assert($markers['Id'] !== null);
+    $id = &$markers['Id'];
+    $version = &$markers['Ver'];
+
+    // source version, always read fresh
+    if ($id && $id[1] === null) {
+        return source_git_version();
+    }
+
+    // packaged version, read version
+    if ($version && $version[1] !== null) {
+        return $version[1];
+    }
+
+    // fall-back to source version as there is no version in file
+    return source_git_version();
+}
+
+function file_version(): string
+{
+    $lines = file(__FILE__);
+    $cap = 12;
+
+    return source_version($lines, $cap);
 }
 
 /**
@@ -809,7 +894,7 @@ if (count(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1))) {
 $opt = [
     'C:T::nvm', ['files-from::', 'dry-run', 'show-match', 'count-matches', 'print-paths',
         'multiple', 'fnmatch:', 'only:', 'invert', 'file-match:', 'file-match-invert',
-        'lines-only:', 'lines-not:']
+        'lines-only:', 'lines-not:', 'version']
 ];
 $opts = getopt($opt[0], $opt[1], $optind);
 if (getopt::erropt($opt[0], $opt[1], $optind)) {
@@ -817,6 +902,16 @@ if (getopt::erropt($opt[0], $opt[1], $optind)) {
     exit(1);
 }
 $opts['verbose'] = getopt::arg(getopt::args($opts, 'v'), true, false);
+if (getopt::arg(getopt::args($opts, 'version'), true, false)) {
+
+    fprintf(STDOUT, "pcre.php %s\n", file_version());
+    if ($opts['verbose']) {
+        fprintf(STDOUT, "    pcre version: %s\n", PCRE_VERSION);
+        fprintf(STDOUT, "    pcre ext: %s\n", phpversion('pcre'));
+    }
+    exit(0);
+}
+
 getopt::arglst(getopt::args($opts, 'C'), static function ($arg) use ($opts) {
     $result = @chdir($arg);
     if (!$result) {

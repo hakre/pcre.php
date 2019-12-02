@@ -21,6 +21,7 @@ $shebangInclude = static function(string $path) {
     file_put_contents($uri, $lines);
     /** @noinspection PhpIncludeInspection */
     include($uri);
+    $GLOBALS['shebangIncludes'][$path] = [$handle, $uri];
 };
 
 $shebangInclude(__DIR__ . '/../pcre.php');
