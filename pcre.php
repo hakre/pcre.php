@@ -3,6 +3,8 @@
 /*
  * pcre pattern search through files (w/ replace)
  *
+ * $Ver$ $Id$
+ *
  * cli wrapper around php preg_grep / preg_replace etc. taking a list
  * of files from stdin/file.
  *
