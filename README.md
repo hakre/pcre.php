@@ -131,6 +131,8 @@ show usage information
 
 ## Installation
 
+_Next:_ [Install Latest Stable `pcre.php` from Github](#install-latest-stable-pcrephp-from-github)
+
 Have a PHP 7.1+ PHP binary as `/usr/bin/env` on the system.
 
 Make `pcre.php` executable (git has you covered on checkout) and
@@ -166,6 +168,38 @@ matches in 0 out of 0 files
 Congratulations, you managed to search no files for nothing!
 
 This confirms installation works.
+
+### Install Latest Stable `pcre.php` from Github
+
+Obtaining the latest stable archive from Github and extracting to
+`~/bin/pcre.php` exemplary works with the following command:
+
+~~~
+$ unlink ~/bin/pcre.php \
+  ; wget -O - https://github.com/hakre/pcre.php/archive/master.tar.gz \
+  | tar -xzf- -C ~/bin --strip-components=1 pcre.php-master/pcre.php \
+  && pcre.php --version
+~~~
+
+which will unlink a potentially existing symbolic link at `~/bin/pcre.php`,
+then fetch the git archive of current HEAD of master (which is considered
+the most stable at the level of most features) and extracting `pcre.php` to
+`~/bin` (owned by the current user/group, executable bits set) and then
+outputting the version (you should see a tagged version like `pcre.php
+v0.0.7`.
+
+Instead of Github, also any tarball from `git-archive` of the project,
+remote or local, can be used.
+
+Take note as this is directly installing from the internet, that if the
+repository has been hijacked, you might not obtain the software you think
+you obtain - just as a word of caution.
+
+If a command similar like in the example above is used to overwrite
+`pcre.php` inside a git checkout of the project itself, git will show the
+file as modified but `git-diff` might not show changes due to `pcre.php
+ident` in `.gitattributes` which is used to differ between concrete
+version numbers and the source revision (`$ pcre.php --version`).
 
 ## Development
 
