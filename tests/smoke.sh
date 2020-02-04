@@ -50,3 +50,23 @@ README.md
 pcre.php
 EOD
 [[ $? -eq 0 ]] || exit 1
+
+echo "# standard search: empty stdin (/dev/null) should not cause error"
+</dev/null ./pcre.php  '~test~' 2>&1 1>/dev/null | grep -q 'error'
+[[ $? -ne 0 ]] || exit 1
+
+echo "# file-match: empty stdin (/dev/null) should not cause error"
+</dev/null ./pcre.php  --file-match '~test~' 2>&1 1>/dev/null | grep -q 'error'
+[[ $? -ne 0 ]] || exit 1
+
+echo "# file-match: empty path should cause error"
+<<EOD cat | ./pcre.php --file-match '~test~' 2>&1 1>/dev/null | grep -q 'error'
+
+EOD
+[[ $? -eq 0 ]] || exit 1
+
+echo "# standard-search: empty path should cause error"
+<<EOD ./pcre.php '~test~' 2>&1 1>/dev/null | grep -q 'error'
+
+EOD
+[[ $? -eq 0 ]] || exit 1

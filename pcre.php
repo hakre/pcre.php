@@ -813,6 +813,11 @@ function fuzzy_paths_from_file(string $path): Generator
     }
 
     $buffer = fread($fp, 4096);
+    if ('' === $buffer && feof($fp)) {
+        fclose($fp);
+        return;
+    }
+
     $ending = "\0";
     $pos = strpos($buffer, $ending);
     if (false === $pos) { // fall back to newline
@@ -1029,6 +1034,10 @@ if (isset($opts['file-match'])) {
         exit(1);
     }
     $pathsFilter(static function (string $path) use ($opts, &$stats): bool {
+        if (!is_file($path) && !is_readable($path)) {
+            fprintf(STDERR, "i/o error: not a readable file '%s'\n", $path);
+            return false;
+        }
         $buffer = file_get_contents($path);
         if ($buffer === false) {
             fprintf(STDERR, "i/o error: can not read file '%s'\n", $path);
