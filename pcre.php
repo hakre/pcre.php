@@ -1007,7 +1007,7 @@ if (isset($opts['fnmatch'])) {
 
 if (isset($opts['only'])) {
     if (!preg_pattern_valid($opts['only'])) {
-        fprintf(STDERR, 'fatal: invalid only pattern: `%s`' . "\n", $opts['only']);
+        fprintf(STDERR, 'fatal: invalid --only pattern: `%s`' . "\n", $opts['only']);
         exit(1);
     }
     $pathsFilter(static function (string $path) use ($opts, &$stats): bool {
