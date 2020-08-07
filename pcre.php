@@ -3,7 +3,7 @@
 /*
  * pcre pattern search through files (w/ replace)
  *
- * $Ver: v0.0.7 $ $Id$
+ * $Ver: v0.1.0 $ $Id$
  *
  * cli wrapper around php preg_grep / preg_replace etc. taking a list
  * of files from stdin/file.
@@ -31,6 +31,7 @@
  *                           files from standard input
  *                           each filename is separated by LF ("\n") in a file
  *     --fnmatch <pattern>   filter the list of path(s) by fnmatch() pattern
+ *     --fnpcre <pattern>    filter the list of path(s) by pcre pattern
  *     --only <pattern>      only operate on files having a line matching pcre
  *                           pattern
  *     --invert              invert the meaning of --only pcre pattern match,
@@ -898,7 +899,7 @@ if (count(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1))) {
 
 $opt = [
     'C:T::nvm', ['files-from::', 'dry-run', 'show-match', 'count-matches', 'print-paths',
-        'multiple', 'fnmatch:', 'only:', 'invert', 'file-match:', 'file-match-invert',
+        'multiple', 'fnmatch:', 'fnpcre:', 'only:', 'invert', 'file-match:', 'file-match-invert',
         'lines-only:', 'lines-not:', 'version']
 ];
 $opts = getopt($opt[0], $opt[1], $optind);
@@ -995,15 +996,28 @@ $pathsMapping = static function (callable $mapping) use ($paths) {
 // git core.quotePath handling
 $pathsMapping('fuzzy_quote_path_normalizer');
 
-if (isset($opts['fnmatch'])) {
-    $pathsFilter(static function (string $path) use ($opts): bool {
-        $fnmatch = fnmatch($opts['fnmatch'], $path);
-        if (!$fnmatch && $opts['verbose']) {
-            fprintf(STDERR, "filter: --fnmatch %s: %s\n", $opts['fnmatch'], $path);
+$addPathsFilter = static function (string $name, callable $filter, callable $validator = null) use ($opts, $pathsFilter) {
+    if (!isset($opts[$name])) {
+        return;
+    }
+    $pattern = (string)$opts[$name];
+    if (null !== $validator && !$validator($pattern)) {
+        fprintf(STDERR, 'fatal: invalid --%s pattern: `%s`' . "\n", $name, $pattern);
+        exit(1);
+    }
+
+    $verbose = $opts['verbose'];
+    $pathsFilter(static function (string $path) use ($name, $pattern, $filter, $verbose): bool {
+        $result = (bool)$filter($pattern, $path);
+        if (!$result && $verbose) {
+            fprintf(STDERR, "filter: --%s %s: %s\n", $name, $pattern, $path);
         }
-        return $fnmatch;
+        return $result;
     });
-}
+};
+
+$addPathsFilter('fnmatch', 'fnmatch');
+$addPathsFilter('fnpcre', 'preg_match','preg_pattern_valid');
 
 if (isset($opts['only'])) {
     if (!preg_pattern_valid($opts['only'])) {

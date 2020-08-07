@@ -39,6 +39,7 @@ File selection options
                           files from standard input
                           each filename is separated by LF ("\n") in a file
     --fnmatch <pattern>   filter the list of path(s) by fnmatch() pattern
+    --fnpcre <pattern>    filter the list of path(s) by pcre pattern
     --only <pattern>      only operate on files having a line matching pcre
                           pattern
     --invert              invert the meaning of --only pcre pattern match,
