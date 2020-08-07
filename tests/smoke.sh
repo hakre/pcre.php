@@ -7,6 +7,7 @@ echo "diff..: $(diff --version | head -n 1)"
 echo "git...: $(git --version | sed -e 's/git version //')"
 echo "php.... $(php --version | head -n 1)"
 echo "shasum: $(shasum --version)"
+echo "awk...: $(awk --version | head -n 1)"
 echo "sort..: $(sort --version | head -n 1)"
 
 echo "# -C works and fails"
@@ -70,3 +71,12 @@ echo "# standard-search: empty path should cause error"
 
 EOD
 [[ $? -eq 0 ]] || exit 1
+
+echo "# newline at very next line should not halt reading paths"
+< <(
+  awk 'BEGIN { while (z++ < 4096) printf "="; printf "\n"; }';
+  echo "pcre.php";
+) ./pcre.php '~~' 2>/dev/null | grep -q '^pcre.php$'
+[[ $? -eq 0 ]] || exit 1
+
+echo "smoke tests done."

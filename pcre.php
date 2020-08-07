@@ -832,7 +832,7 @@ function fuzzy_paths_from_file(string $path): Generator
         yield $buffer;
     }
 
-    while (!feof($fp) && $line = stream_get_line($fp, 4096, $ending)) {
+    while (!feof($fp) && false !== $line = stream_get_line($fp, 4096, $ending)) {
         if (isset($buffer)) {
             yield $buffer . $line;
             unset($buffer);
